@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráficos de Utilização do Sistema RU — Todas as Filas</title>
+  <script src="../fila-ru-contador/public/lib/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy: #16263A;
+      --blue: #2663B4;
+      --red: #DC2626;
+      --green: #16A34A;
+      --pink: #EC4899;
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --text-dark: #1E293B;
+      --text-gray: #64748B;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    .header {
+      background: var(--navy);
+      color: white;
+      padding: 24px 32px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(22, 38, 58, 0.12);
+    }
+    .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .header p { color: #CBD5E1; font-size: 14px; }
+    .badges {
+      display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;
+    }
+    .badge {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .grid-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .kpi-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-gray); margin-bottom: 6px; }
+    .kpi-value { font-size: 28px; font-weight: 800; color: var(--navy); }
+    .kpi-desc { font-size: 12px; color: var(--text-gray); margin-top: 4px; }
+    
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    .chart-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .chart-box.full-width {
+      grid-column: 1 / -1;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .chart-subtitle {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-bottom: 16px;
+    }
+    .canvas-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+    .legend-info {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #F1F5F9;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-dark);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Painel de Utilização do Sistema RU — Todas as Filas</h1>
+    <p>Avaliação de Desempenho de Sistemas • Sessão de Campo: 04/11/2026 (65,34 minutos)</p>
+    <div class="badges">
+      <span class="badge" style="background:#DC2626;">Fila 1 (Entrada): ρ = 88,6% (Pico 114,5%)</span>
+      <span class="badge" style="background:#16A34A;">Fila 2 (Buffet): ρ = 79,1% (Pico 98,0%)</span>
+      <span class="badge" style="background:#EC4899;">Salão Mesas: Pico 116 / 216 Cadeiras (53,7%)</span>
+      <span class="badge" style="background:#9333EA;">Fila 3 (Saída 1h): ρ = 132,8%</span>
+    </div>
+  </div>
+
+  <div class="grid-kpis">
+    <div class="kpi-card" style="border-left: 4px solid var(--red);">
+      <div class="kpi-title">Fila 1 — Catraca</div>
+      <div class="kpi-value" style="color:var(--red);">88,6%</div>
+      <div class="kpi-desc">Utilização média global (Pico: 114,5% — saturação)</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid var(--green);">
+      <div class="kpi-title">Fila 2 — Buffet</div>
+      <div class="kpi-value" style="color:var(--green);">79,1%</div>
+      <div class="kpi-desc">Utilização média global (Estável em regime permanente)</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid var(--pink);">
+      <div class="kpi-title">Salão de Mesas</div>
+      <div class="kpi-value" style="color:var(--pink);">53,7%</div>
+      <div class="kpi-desc">Pico máximo: 116 de 216 cadeiras (Status Moderado)</div>
+    </div>
+    <div class="kpi-card" style="border-left: 4px solid #9333EA;">
+      <div class="kpi-title">Fila 3 — Saída</div>
+      <div class="kpi-value" style="color:#9333EA;">132,8%</div>
+      <div class="kpi-desc">Taxa aparente na 1ª hora (90 alunos almoçando)</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+
+    <!-- Gráfico 1: Utilização Comparativa -->
+    <div class="chart-box">
+      <div class="chart-title">1. Fator de Utilização por Subsistema (Média vs. Pico)</div>
+      <div class="chart-subtitle">Comparativo direto com a linha de saturação de 1 servidor (ρ = 1,0 / 100%)</div>
+      <div class="canvas-container">
+        <canvas id="chartUtilizacaoComparativa"></canvas>
+      </div>
+      <div class="legend-info">
+        <strong>Diagnóstico:</strong> A Fila 1 ultrapassa 100% no pico, gerando fila externa. O buffet opera próximo do limite, e as mesas têm folga estrutural.
+      </div>
+    </div>
+
+    <!-- Gráfico 2: Evolução Temporal F1 -->
+    <div class="chart-box">
+      <div class="chart-title">2. Evolução da Utilização na Fila 1 por Blocos de 5 min</div>
+      <div class="chart-subtitle">Demonstração da separação rigorosa entre Regime de Calma e Regime de Pico</div>
+      <div class="canvas-container">
+        <canvas id="chartEvolucaoF1"></canvas>
+      </div>
+      <div class="legend-info">
+        <strong>Calma vs. Pico:</strong> Blocos de 0 a 10 min com ρ < 25%. A partir do min 30, ρ salta para 114,5% sustentado, fazendo a fila física acumular.
+      </div>
+    </div>
+
+    <!-- Gráfico 3: Taxas Simultâneas λ vs μ -->
+    <div class="chart-box full-width">
+      <div class="chart-title">3. Confronto Direto: Taxa de Chegadas λ(t) vs. Capacidade de Atendimento μ</div>
+      <div class="chart-subtitle">Fila 1 (Catraca: μ = 3,32 p/min) e Fila 2 (Buffet: μ = 3,72 p/min) em blocos de 5 minutos</div>
+      <div class="canvas-container" style="height: 360px;">
+        <canvas id="chartTaxasChegadaServico"></canvas>
+      </div>
+      <div class="legend-info">
+        <strong>Inversão Estocástica:</strong> A área sombreada em vermelho ilustra os momentos em que λ(t) > μ, gerando acúmulo compulsório na calçada.
+      </div>
+    </div>
+
+    <!-- Gráfico 4: Ocupação do Salão de Mesas -->
+    <div class="chart-box full-width">
+      <div class="chart-title">4. Dinâmica Temporal de Ocupação das Mesas vs. Limite de 216 Cadeiras</div>
+      <div class="chart-subtitle">Evolução dos alunos sentados ao longo de toda a sessão de 65 minutos</div>
+      <div class="canvas-container" style="height: 340px;">
+        <canvas id="chartMesasOcupacao"></canvas>
+      </div>
+      <div class="legend-info">
+        <strong>Comprovação de Folga:</strong> O pico de 116 alunos atinge apenas a faixa amarela (Moderada), comprovando que o refeitório tem capacidade para absorver uma 2ª catraca sem transbordar.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const labelsBlocos = ['0–5m', '5–10m', '10–15m', '15–20m', '20–25m', '25–30m', '30–35m', '35–40m', '40–45m', '45–50m', '50–55m', '55–60m', '60–65m'];
+    const rho1Blocos = [24.1, 12.1, 72.4, 48.2, 54.3, 66.3, 102.5, 114.5, 114.5, 114.5, 66.3, 90.4, 114.5];
+    const lambda1Blocos = [0.80, 0.40, 2.40, 1.60, 1.80, 2.20, 3.40, 3.80, 3.80, 3.80, 2.20, 3.00, 3.80];
+    const lambda2Blocos = [0.00, 0.00, 2.40, 5.60, 5.80, 1.20, 4.00, 3.60, 3.80, 3.60, 2.60, 2.80, 3.00];
+    const mu1 = 3.32;
+    const mu2 = 3.72;
+
+    // 1. Chart Comparativo
+    new Chart(document.getElementById('chartUtilizacaoComparativa'), {
+      type: 'bar',
+      data: {
+        labels: ['F1 (Entrada)', 'F2 (Buffet)', 'Salão Mesas', 'F3 (Saída)'],
+        datasets: [
+          {
+            label: 'Utilização Média Global (%)',
+            data: [88.6, 79.1, 24.6, 132.8],
+            backgroundColor: ['#DC2626', '#16A34A', '#EC4899', '#9333EA']
+          },
+          {
+            label: 'Utilização no Pico (%)',
+            data: [114.5, 98.0, 53.7, 132.8],
+            backgroundColor: ['rgba(220,38,38,0.4)', 'rgba(22,163,74,0.4)', 'rgba(236,72,153,0.4)', 'rgba(147,51,234,0.4)'],
+            borderColor: ['#DC2626', '#16A34A', '#EC4899', '#9333EA'],
+            borderWidth: 1.5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 155, title: { display: true, text: 'Taxa de Utilização (%)' } }
+        }
+      }
+    });
+
+    // 2. Chart Evolução F1
+    new Chart(document.getElementById('chartEvolucaoF1'), {
+      type: 'line',
+      data: {
+        labels: labelsBlocos,
+        datasets: [
+          {
+            label: 'Utilização Efetiva Fila 1 (%)',
+            data: rho1Blocos,
+            borderColor: '#DC2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.15)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2.5,
+            pointRadius: 5
+          },
+          {
+            label: 'Limite Crítico ρ = 100%',
+            data: Array(labelsBlocos.length).fill(100),
+            borderColor: '#991B1B',
+            borderDash: [5, 5],
+            pointRadius: 0,
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 130, title: { display: true, text: 'Fator de Utilização ρ (%)' } }
+        }
+      }
+    });
+
+    // 3. Chart Taxas λ vs μ
+    new Chart(document.getElementById('chartTaxasChegadaServico'), {
+      type: 'line',
+      data: {
+        labels: labelsBlocos,
+        datasets: [
+          {
+            label: 'Chegadas Catraca λ1(t) [p/min]',
+            data: lambda1Blocos,
+            borderColor: '#DC2626',
+            backgroundColor: 'rgba(220,38,38,0.1)',
+            borderWidth: 2,
+            tension: 0.2
+          },
+          {
+            label: 'Capacidade Catraca μ1 = 3,32 p/min',
+            data: Array(labelsBlocos.length).fill(mu1),
+            borderColor: '#16263A',
+            borderWidth: 2,
+            pointRadius: 0
+          },
+          {
+            label: 'Chegadas Buffet λ2(t) [p/min]',
+            data: lambda2Blocos,
+            borderColor: '#16A34A',
+            borderWidth: 2,
+            tension: 0.2
+          },
+          {
+            label: 'Capacidade Buffet μ2 = 3,72 p/min',
+            data: Array(labelsBlocos.length).fill(mu2),
+            borderColor: '#065F46',
+            borderDash: [4, 4],
+            borderWidth: 2,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 6.5, title: { display: true, text: 'Taxa (Pessoas / minuto)' } }
+        }
+      }
+    });
+
+    // 4. Chart Ocupação Mesas
+    // Dados de exemplo aproximados da curva de 0 a 65 min
+    const temposMin = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65];
+    const mesasOcupadas = [0, 0, 1, 20, 43, 49, 71, 92, 106, 116, 111, 101, 94, 90];
+    new Chart(document.getElementById('chartMesasOcupacao'), {
+      type: 'line',
+      data: {
+        labels: temposMin.map(t => t + ' min'),
+        datasets: [
+          {
+            label: 'Cadeiras Ocupadas no Salão',
+            data: mesasOcupadas,
+            borderColor: '#EC4899',
+            backgroundColor: 'rgba(236, 72, 153, 0.25)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 3,
+            pointRadius: 5
+          },
+          {
+            label: 'Capacidade Física Limite (K = 216 Cadeiras)',
+            data: Array(temposMin.length).fill(216),
+            borderColor: '#DC2626',
+            borderDash: [6, 4],
+            borderWidth: 2,
+            pointRadius: 0
+          },
+          {
+            label: 'Nível 50% (108 Cadeiras - Limiar Tranquilo/Moderado)',
+            data: Array(temposMin.length).fill(108),
+            borderColor: '#10B981',
+            borderDash: [2, 2],
+            borderWidth: 1.5,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { beginAtZero: true, max: 235, title: { display: true, text: 'Cadeiras Ocupadas no Salão' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
